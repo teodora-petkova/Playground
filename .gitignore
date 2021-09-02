@@ -2,3 +2,4 @@
 *.tst
 *.cmp
 *.out
+nand2tetris/projects/05/*.hack
