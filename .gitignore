@@ -3,3 +3,11 @@
 *.cmp
 *.out
 nand2tetris/projects/05/*.hack
+nand2tetris/projects/06/*_pycache_*
+nand2tetris/projects/06/tests/add/add.hack
+nand2tetris/projects/06/tests/max/max.hack
+nand2tetris/projects/06/tests/max/maxl.hack
+nand2tetris/projects/06/tests/rect/rect.hack
+nand2tetris/projects/06/tests/rect/rectl.hack
+nand2tetris/projects/06/tests/pong/pong.hack
+nand2tetris/projects/06/tests/pong/pongl.hack
