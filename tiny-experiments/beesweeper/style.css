@@ -1,0 +1,39 @@
+*{
+    color: white;
+}
+
+.title{
+    font-size: 3rem;
+}
+
+body{
+    align-items: center;
+    margin: 0;
+    background-color: #333;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.grid{
+    display: flex;
+    flex-wrap: wrap;
+    background: olive;
+}
+
+.grid div {
+    box-sizing: border-box;
+    border: 1px solid green;
+}
+
+.revealed{
+    background-color:rgb(133, 159, 90);
+    text-align: center;
+    text-anchor: middle;
+}
+
+img.emojione {
+    margin: 0px !important;
+    display: inline !important;
+    
+  }
