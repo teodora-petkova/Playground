@@ -1,0 +1,56 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "create build folder",
+            "type": "shell",
+            "windows": {
+                "command": "cmd",
+                "args": [
+                    "/C",
+                    "if not exist ${workspaceFolder}\\build mkdir ${workspaceFolder}\\build"
+                ]
+            }
+        },
+        {
+            "label": "copy SDL2",
+            "type": "shell",
+            "windows": {
+                "command": "copy \"${workspaceFolder}\\libs\\sdl2.2.0.14\\SDL2.dll\" \"${workspaceFolder}\\build\\SDL2.dll\""
+            },
+            "dependsOn": "create build folder"
+        },
+        {
+            "label": "msvc build",
+            "type": "shell",
+            "command": "cl.exe",
+            "args": [
+                "/Zi",
+                "/EHsc",
+                "/Fe:",
+                ".\\build\\main.exe",
+                "/Fd:",
+                "${workspaceFolder}\\build\\vc140.pdb",
+                "/Fo.\\build\\",
+                "${workspaceFolder}\\sources\\*.cpp",
+                "/I",
+                "${workspaceFolder}\\libs\\sdl2.2.0.14\\include",
+                "/I",
+                "${workspaceFolder}",
+                "/link",
+                "${workspaceFolder}\\libs\\sdl2.2.0.14\\lib\\Win32\\*"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "always"
+            },
+            "problemMatcher": "$msCompile",
+            //"dependsOn": [
+            //    "copy SDL2"
+            //]
+        }
+    ]
+}
