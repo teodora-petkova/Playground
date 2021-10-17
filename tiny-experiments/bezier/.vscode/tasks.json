@@ -1,0 +1,59 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "create build folder",
+            "type": "shell",
+            "windows": {
+                "command": "cmd",
+                "args": [
+                    "/C",
+                    "if not exist ${workspaceFolder}\\build mkdir ${workspaceFolder}\\build"
+                ]
+            }
+        },
+        {
+            "label": "copy GLFW3",
+            "type": "shell",
+            "windows": {
+                "command": "copy \"${workspaceFolder}\\libs\\glfw\\glfw3.dll\" \"${workspaceFolder}\\build\\glfw3.dll\""
+            },
+            "dependsOn": "create build folder"
+        },
+        {
+            "label": "msvc build",
+            "type": "shell",
+            "command": "cl.exe",
+            "args": [
+                "/Zi",
+                "/FS",
+                "/EHsc",
+                "/Fe:",
+                "${workspaceFolder}\\build\\main.exe",
+                "/Fd:",
+                "${workspaceFolder}\\build\\vc140.pdb",
+                "/Fo.\\build\\",
+                "${workspaceFolder}\\src\\*.cpp",
+                "/I${workspaceFolder}\\include\\",
+                // library files
+                "opengl32.lib",
+                "gdi32.lib",
+                "kernel32.lib",
+                "user32.lib",
+                "shell32.lib",
+                "${workspaceFolder}\\libs\\glfw\\glfw3_mt.lib",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "always"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": [
+                "copy GLFW3"
+            ]
+        }
+    ]
+}
