@@ -154,6 +154,7 @@ public:
         glScissor(0, 0, w, h);
         glClearColor(0.9, 0.8, 0.8, 0);
         glClear(GL_COLOR_BUFFER_BIT);
+        renderHodographView();
 
         // box (1, 1)
         glLoadIdentity();
@@ -198,6 +199,13 @@ private:
         DrawingUtils::drawLine(Point(0, 0), Point(0, 1), 1, 0, 1);
 
         this->curve.drawBernsteins();
+    }
+
+    void renderHodographView()
+    {
+        Point center = Point(0, 0);
+
+        this->curve.drawHodograph(center);
     }
 
     bool isPointInScene(Point p) const
