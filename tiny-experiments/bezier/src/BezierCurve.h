@@ -120,12 +120,48 @@ public:
                 bernsteins[i].push_back(Point(t, bernstein));
             }
         }
-            for (auto bernstein : bernsteins)
+        for (auto bernstein : bernsteins)
+        {
+            float r, g, b;
+            std::tie(r, g, b) = colorBernstein;
+            DrawingUtils::drawCurve(bernstein, r, g, b);
+        }
+    }
+
+    void drawHodograph(Point center)
+    {
+        int n = this->controlPoints.size();
+
+        if (n >= 2)
+        {
+            // the starting point for drawing the vectors!
+            Point p1 = center;
+
+            // actually end points for the hodograph vectors
+            auto hodographControlPoints = std::vector<Point>(n - 1);
+
+            for (int j = 0; j < n - 1; j++)
+            {
+                Point pj1 = this->controlPoints[j + 1];
+                Point pj = this->controlPoints[j];
+                Point p2 = Point((pj1.x - pj.x), (pj1.y - pj.y));
+
+                hodographControlPoints[j] = Point(p1.x + p2.x, p1.y + p2.y);
+            }
+
+            for (auto p2 : hodographControlPoints)
             {
                 float r, g, b;
-                std::tie(r, g, b) = colorBernstein;
-                DrawingUtils::drawCurve(bernstein, r, g, b);
+                std::tie(r, g, b) = colorVectors;
+                DrawingUtils::drawLine(p1, p2, r, g, b);
             }
+            drawControlPoints(hodographControlPoints);
+
+            std::vector<Point> points = getCurve(hodographControlPoints);
+
+            float r, g, b;
+            std::tie(r, g, b) = colorCurve;
+            DrawingUtils::drawCurve(points, r, g, b);
         }
     }
 
@@ -137,6 +173,7 @@ private:
     std::tuple<float, float, float> colorControlPoints = {1.0f, 0.8f, 0.0f};
     std::tuple<float, float, float> colorCurve = {0.0f, 1.0f, 0.0f};
     std::tuple<float, float, float> colorBernstein = {0.0f, 0.5f, 1.0f};
+    std::tuple<float, float, float> colorVectors = {1.0f, 0.0f, 1.0f};
 
     double getBernstein(int i, int n, double t, BinomialCoefficients coefficients) const
     {
