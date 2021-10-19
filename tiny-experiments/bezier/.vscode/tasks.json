@@ -42,6 +42,7 @@
                 "user32.lib",
                 "shell32.lib",
                 "${workspaceFolder}\\libs\\glfw\\glfw3_mt.lib",
+                "${workspaceFolder}\\include\\glad\\glad.c",
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

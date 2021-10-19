@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GLFW\glfw3.h"
+
 #include <math.h>
 
 #include "Point.h"
@@ -15,7 +16,7 @@ public:
     {
         this->window = glfwCreateWindow(sceneWidth, sceneHeight, title, NULL, NULL);
 
-        this->sceneWidth = sceneWidth * 0.75;
+        this->sceneWidth = sceneWidth;
         this->sceneHeight = sceneHeight;
 
         this->scroller = Scroller();
@@ -123,9 +124,46 @@ public:
 
     void renderScene()
     {
+        int w = sceneWidth * 0.5;
+        int h = sceneHeight * 0.5;
+
+        glEnable(GL_SCISSOR_TEST);
+
+        // box (0, 0)
+        glLoadIdentity();
+        glOrtho(0, w, h, 0, -1, 1);
+        glViewport(0, w, w, h);
+        glScissor(0, w, w, h);
+        glClearColor(0.98, 0.88, 0.88, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
         renderMainView();
 
+        // box (0, 1)
+        glLoadIdentity();
+        glOrtho(-0.1, 1.1, -0.1, 1.1, -1, 1);
+        glViewport(w, h, w, h);
+        glScissor(w, h, w, h);
+        glClearColor(0.8, 0.9, 0.9, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
         renderBernsteinView();
+
+        // box (1, 0)
+        glLoadIdentity();
+        glOrtho(-w * 0.6, w * 0.6, h * 0.6, -h * 0.6, -1, 1);
+        glViewport(0, 0, w, h);
+        glScissor(0, 0, w, h);
+        glClearColor(0.9, 0.8, 0.8, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // box (1, 1)
+        glLoadIdentity();
+        glOrtho(0, 0, w, 0, -1, 1);
+        glViewport(w, 0, w, h);
+        glScissor(w, 0, w, h);
+        glClearColor(0.9, 0.9, 0.8, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glDisable(GL_SCISSOR_TEST);
     }
 
 private:
@@ -143,10 +181,6 @@ private:
     void renderMainView()
     {
         // main view
-        glViewport(0, 0, sceneWidth, sceneHeight);
-        glScissor(0, 0, sceneWidth, sceneHeight);
-        glEnable(GL_SCISSOR_TEST);
-
         if (leftButtonDown)
         {
             onMouseDragging();
@@ -155,20 +189,20 @@ private:
         this->scroller.draw();
 
         this->curve.drawCurve();
-
-        glDisable(GL_SCISSOR_TEST);
     }
 
     void renderBernsteinView()
     {
-        glViewport(sceneWidth, 0, sceneWidth / 0.75, sceneHeight);
+        // render axis - Ox and Oy
+        DrawingUtils::drawLine(Point(0, 0), Point(1, 0), 1, 0, 1);
+        DrawingUtils::drawLine(Point(0, 0), Point(0, 1), 1, 0, 1);
 
         this->curve.drawBernsteins();
     }
 
     bool isPointInScene(Point p) const
     {
-        return p.x < this->sceneWidth && p.y < this->sceneHeight && p.x >= 0 && p.y >= 0;
+        return p.x >= 0 && p.y >= 0 && p.x < this->sceneWidth * 0.5 && p.y < this->sceneHeight * 0.5;
     }
 
     void onMouseDragging()
@@ -181,7 +215,7 @@ private:
         }
         else
         {
-            if (!this->curve.empty())
+            if (isPointInScene(cursorPoint) && !this->curve.empty())
             {
                 int minIndex;
                 double minDistance;
@@ -251,8 +285,6 @@ private:
     void setUpMatrix(int sceneWidth, int sceneHeight)
     {
         glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(0, sceneWidth, sceneHeight, 0, -1, 1);
     }
     ////////////////////////////////////////////////
 };

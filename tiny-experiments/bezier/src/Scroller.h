@@ -40,12 +40,12 @@ public:
     }
 
 private:
-    int width = 200;
-    int height = 100;
+    int width = 120;
+    int height = 30;
 
-    Point start = Point(20, 50);
-    Point end = Point(120, 50);
-    Point scrollerPoint = Point(70, 50);
+    Point start = Point(15, 15);
+    Point end = Point(115, 15);
+    Point scrollerPoint = Point(70, 15);
 
     int _t = 0.5;
 };

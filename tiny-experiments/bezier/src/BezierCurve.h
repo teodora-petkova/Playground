@@ -106,7 +106,7 @@ public:
         int n = this->controlPoints.size() - 1;
         int size = CURVE_POINTS_COUNT;
 
-        std::vector<std::vector<Point>> bernsteins = std::vector<std::vector<Point>>(size);
+        std::vector<std::vector<Point>> bernsteins = std::vector<std::vector<Point>>(n + 1);
         auto coefficients = BinomialCoefficients::BinomialCoefficients(n + 1);
 
         for (int k = 0; k < size; k++)
@@ -117,10 +117,9 @@ public:
             {
                 double bernstein = getBernstein(i, n, t, coefficients);
 
-                int scale = 200;
-                bernsteins[i].push_back(Point(t * scale, bernstein * scale));
+                bernsteins[i].push_back(Point(t, bernstein));
             }
-
+        }
             for (auto bernstein : bernsteins)
             {
                 float r, g, b;

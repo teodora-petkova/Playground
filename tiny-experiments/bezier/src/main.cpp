@@ -10,8 +10,8 @@ int main(void)
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
-    int sceneWidth = 1200;
-    int sceneHeight = 600;
+    int sceneWidth = 800;
+    int sceneHeight = 800;
     CustomWindow window = CustomWindow(sceneWidth, sceneHeight, "Polar 2D");
 
     if (!window.isCreated())
