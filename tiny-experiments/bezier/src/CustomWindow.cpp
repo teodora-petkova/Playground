@@ -124,6 +124,7 @@ public:
     void renderScene()
     {
         renderMainView();
+
         renderBernsteinView();
     }
 
@@ -153,10 +154,6 @@ private:
 
         this->scroller.draw();
 
-        this->curve.drawControlPoints();
-
-        this->curve.updateCurve();
-
         this->curve.drawCurve();
 
         glDisable(GL_SCISSOR_TEST);
@@ -165,8 +162,6 @@ private:
     void renderBernsteinView()
     {
         glViewport(sceneWidth, 0, sceneWidth / 0.75, sceneHeight);
-
-        this->curve.updateBernsteins();
 
         this->curve.drawBernsteins();
     }
