@@ -27,16 +27,21 @@ public:
                                  : p.y;
 
         this->scrollerPoint = Point(x, y);
-        this->_t = (end.x - x) / (end.x - start.x);
+        this->_t = (scrollerPoint.x - start.x) / (end.x - start.x);
     }
 
-    void draw()
+    void initDraw()
     {
         DrawingUtils::drawLine(start, end, 0.3f, 0.3f, 0.3f);
 
-        _t = _t * (end.x - start.x) / (end.x - start.x);
+        this->_t = (scrollerPoint.x - start.x) / (end.x - start.x);
 
         DrawingUtils::drawPoint(scrollerPoint, 0.3f, 0.3f, 0.3f, 7.0f);
+    }
+
+    double t() const
+    {
+        return _t;
     }
 
 private:
@@ -47,5 +52,5 @@ private:
     Point end = Point(115, 15);
     Point scrollerPoint = Point(70, 15);
 
-    int _t = 0.5;
+    double _t = 0.5;
 };

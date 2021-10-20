@@ -12,7 +12,7 @@ int main(void)
 
     int sceneWidth = 800;
     int sceneHeight = 800;
-    CustomWindow window = CustomWindow(sceneWidth, sceneHeight, "Polar 2D");
+    CustomWindow window = CustomWindow(sceneWidth, sceneHeight, "Bezier Curve");
 
     if (!window.isCreated())
     {

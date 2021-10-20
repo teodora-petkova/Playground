@@ -187,9 +187,11 @@ private:
             onMouseDragging();
         }
 
-        this->scroller.draw();
+        this->scroller.initDraw();
 
         this->curve.drawCurve();
+
+        this->curve.drawPolar(this->scroller.t());
     }
 
     void renderBernsteinView()

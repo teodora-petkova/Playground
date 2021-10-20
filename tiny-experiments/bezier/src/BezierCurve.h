@@ -16,6 +16,12 @@ class BezierCurve
 public:
     BezierCurve()
     {
+        this->curvePoints = std::vector<Point>(CURVE_POINTS_COUNT);
+
+        for (int i = 0; i < this->curvePoints.size(); i++)
+        {
+            this->curvePoints[i] = Point(0, 0);
+        }
     }
 
     BezierCurve(int count)
@@ -25,8 +31,7 @@ public:
 
         for (int i = 0; i < this->controlPoints.size(); i++)
         {
-            Point p = Point(0, 0);
-            this->controlPoints[i] = p;
+            this->controlPoints[i] = Point(0, 0);
         }
     }
 
@@ -91,11 +96,11 @@ public:
     {
         drawControlPoints(this->controlPoints);
 
-        std::vector<Point> points = getCurve(this->controlPoints);
+        this->curvePoints = getCurve(this->controlPoints);
 
         float r, g, b;
         std::tie(r, g, b) = colorCurve;
-        DrawingUtils::drawCurve(points, r, g, b);
+        DrawingUtils::drawCurve(this->curvePoints, r, g, b);
 
         //points.clear();
         //points.shrink_to_fit();
@@ -125,6 +130,36 @@ public:
             float r, g, b;
             std::tie(r, g, b) = colorBernstein;
             DrawingUtils::drawCurve(bernstein, r, g, b);
+        }
+    }
+
+    void drawPolar(double t)
+    {
+        int n = this->controlPoints.size() - 1;
+        if (n >= 1)
+        {
+            auto middlePoints = std::vector<Point>(n);
+            for (int i = 0; i < n; i++)
+            {
+                middlePoints[i] = this->controlPoints[i] * (1 - t) + this->controlPoints[i + 1] * t;
+            }
+
+            auto polar = getCurve(middlePoints);
+
+            float r, g, b;
+            std::tie(r, g, b) = colorPolar;
+
+            // the point where the polar and bezier curve match t = t1
+            int k = t * (CURVE_POINTS_COUNT - 1);
+            DrawingUtils::drawPoint(polar[k], r, g, b, 7.0f);
+
+            // tangents
+            for (int k = 0; k < CURVE_POINTS_COUNT; k += 5)
+            {
+                DrawingUtils::drawLine(this->curvePoints[k], polar[k], r, g, b);
+            }
+
+            DrawingUtils::drawCurve(polar, r, g, b);
         }
     }
 
@@ -168,12 +203,14 @@ public:
 private:
     std::vector<Point> controlPoints;
     std::vector<Point> bernstein;
+    std::vector<Point> curvePoints;
 
     // colours
     std::tuple<float, float, float> colorControlPoints = {1.0f, 0.8f, 0.0f};
     std::tuple<float, float, float> colorCurve = {0.0f, 1.0f, 0.0f};
     std::tuple<float, float, float> colorBernstein = {0.0f, 0.5f, 1.0f};
     std::tuple<float, float, float> colorVectors = {1.0f, 0.0f, 1.0f};
+    std::tuple<float, float, float> colorPolar = {0.0f, 0.5f, 1.0f};
 
     double getBernstein(int i, int n, double t, BinomialCoefficients coefficients) const
     {
@@ -186,7 +223,7 @@ private:
     {
         std::vector<Point> curvePoints = std::vector<Point>(CURVE_POINTS_COUNT);
 
-        if (controlPoints.size() >= 2)
+        if (controlPoints.size() >= 1)
         {
             auto coefficients = BinomialCoefficients::BinomialCoefficients(controlPoints.size());
 
