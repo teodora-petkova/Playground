@@ -32,11 +32,11 @@ public:
 
     void initDraw()
     {
-        DrawingUtils::drawLine(start, end, 0.3f, 0.3f, 0.3f);
+        DrawingUtils::drawLine(start, end, {0.3f, 0.3f, 0.3f});
 
         this->_t = (scrollerPoint.x - start.x) / (end.x - start.x);
 
-        DrawingUtils::drawPoint(scrollerPoint, 0.3f, 0.3f, 0.3f, 7.0f);
+        DrawingUtils::drawPoint(scrollerPoint, {0.3f, 0.3f, 0.3f}, 7.0f);
     }
 
     double t() const

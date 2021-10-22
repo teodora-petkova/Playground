@@ -158,11 +158,12 @@ public:
 
         // box (1, 1)
         glLoadIdentity();
-        glOrtho(0, 0, w, 0, -1, 1);
+        glOrtho(0, w, h, 0, -1, 1);
         glViewport(w, 0, w, h);
         glScissor(w, 0, w, h);
         glClearColor(0.9, 0.9, 0.8, 0);
         glClear(GL_COLOR_BUFFER_BIT);
+        renderSubdivisionView();
 
         glDisable(GL_SCISSOR_TEST);
     }
@@ -197,8 +198,8 @@ private:
     void renderBernsteinView()
     {
         // render axis - Ox and Oy
-        DrawingUtils::drawLine(Point(0, 0), Point(1, 0), 1, 0, 1);
-        DrawingUtils::drawLine(Point(0, 0), Point(0, 1), 1, 0, 1);
+        DrawingUtils::drawLine(Point(0, 0), Point(1, 0), {1, 0, 1});
+        DrawingUtils::drawLine(Point(0, 0), Point(0, 1), {1, 0, 1});
 
         this->curve.drawBernsteins();
     }
@@ -208,6 +209,11 @@ private:
         Point center = Point(0, 0);
 
         this->curve.drawHodograph(center);
+    }
+
+    void renderSubdivisionView()
+    {
+        this->curve.drawSubdividedCurve(this->scroller.t());
     }
 
     bool isPointInScene(Point p) const
@@ -231,7 +237,7 @@ private:
                 double minDistance;
                 std::tie(minIndex, minDistance) = this->curve.getClosestControlPointIndexAndDistance(cursorPoint);
 
-                // if (minDistance <= minPixelsToGrabAPoint)
+                //if (minDistance <= minPixelsToGrabAPoint)
                 {
                     this->curve.setControlPoint(minIndex, cursorPoint);
                 }

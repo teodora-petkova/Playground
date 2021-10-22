@@ -94,13 +94,11 @@ public:
 
     void drawCurve()
     {
-        drawControlPoints(this->controlPoints);
+        drawControlPoints(this->controlPoints, colorControlPoints);
 
         this->curvePoints = getCurve(this->controlPoints);
 
-        float r, g, b;
-        std::tie(r, g, b) = colorCurve;
-        DrawingUtils::drawCurve(this->curvePoints, r, g, b);
+        DrawingUtils::drawCurve(this->curvePoints, colorCurve);
 
         //points.clear();
         //points.shrink_to_fit();
@@ -127,9 +125,7 @@ public:
         }
         for (auto bernstein : bernsteins)
         {
-            float r, g, b;
-            std::tie(r, g, b) = colorBernstein;
-            DrawingUtils::drawCurve(bernstein, r, g, b);
+            DrawingUtils::drawCurve(bernstein, colorBernstein);
         }
     }
 
@@ -146,20 +142,17 @@ public:
 
             auto polar = getCurve(middlePoints);
 
-            float r, g, b;
-            std::tie(r, g, b) = colorPolar;
-
             // the point where the polar and bezier curve match t = t1
             int k = t * (CURVE_POINTS_COUNT - 1);
-            DrawingUtils::drawPoint(polar[k], r, g, b, 7.0f);
+            DrawingUtils::drawPoint(polar[k], colorPolar, 7.0f);
 
             // tangents
             for (int k = 0; k < CURVE_POINTS_COUNT; k += 5)
             {
-                DrawingUtils::drawLine(this->curvePoints[k], polar[k], r, g, b);
+                DrawingUtils::drawLine(this->curvePoints[k], polar[k], colorPolar);
             }
 
-            DrawingUtils::drawCurve(polar, r, g, b);
+            DrawingUtils::drawCurve(polar, colorPolar);
         }
     }
 
@@ -186,17 +179,60 @@ public:
 
             for (auto p2 : hodographControlPoints)
             {
-                float r, g, b;
-                std::tie(r, g, b) = colorVectors;
-                DrawingUtils::drawLine(p1, p2, r, g, b);
+                DrawingUtils::drawLine(p1, p2, colorVectors);
             }
-            drawControlPoints(hodographControlPoints);
+            drawControlPoints(hodographControlPoints, colorControlPoints);
 
             std::vector<Point> points = getCurve(hodographControlPoints);
 
-            float r, g, b;
-            std::tie(r, g, b) = colorCurve;
-            DrawingUtils::drawCurve(points, r, g, b);
+            DrawingUtils::drawCurve(points, colorCurve);
+        }
+    }
+
+    void drawSubdividedCurve(double t = 0.5)
+    {
+        int n = this->controlPoints.size();
+        if (n > 0)
+        {
+            // de Casteljau
+            auto middlePoints = std::vector<std::vector<Point>>(n);
+            auto pointsCurve0c = std::vector<Point>(n);
+            auto pointsCurvec1 = std::vector<Point>(n);
+
+            for (int r = 0; r < n; r++)
+            {
+                middlePoints[0].push_back(this->controlPoints[r]);
+            }
+
+            for (int r = 1; r < n; r++)
+            {
+                for (int i = 0; i < n - r; i++)
+                {
+                    middlePoints[r].push_back(middlePoints[r - 1][i] * (1 - t) + middlePoints[r - 1][i + 1] * t);
+                }
+            }
+
+            for (int r = 0; r <= n - 1; r++)
+            {
+                pointsCurve0c[r] = middlePoints[r][0];
+            }
+
+            for (int r = n - 1; r >= 0; r--)
+            {
+                pointsCurvec1[n - 1 - r] = middlePoints[r][n - 1 - r];
+            }
+
+            // drawing
+            DrawingUtils::drawCurve(this->controlPoints, colorControlPoints);
+
+            auto curve0c = getCurve(pointsCurve0c);
+            auto curvec1 = getCurve(pointsCurvec1);
+
+            drawControlPoints(pointsCurve0c, colorSubdividedSegment1);
+            DrawingUtils::drawCurve(curve0c, colorSubdividedSegment1);
+
+            drawControlPoints(pointsCurvec1, colorSubdividedSegment2);
+            DrawingUtils::drawCurve(curvec1, colorSubdividedSegment2);
         }
     }
 
@@ -206,11 +242,13 @@ private:
     std::vector<Point> curvePoints;
 
     // colours
-    std::tuple<float, float, float> colorControlPoints = {1.0f, 0.8f, 0.0f};
-    std::tuple<float, float, float> colorCurve = {0.0f, 1.0f, 0.0f};
-    std::tuple<float, float, float> colorBernstein = {0.0f, 0.5f, 1.0f};
-    std::tuple<float, float, float> colorVectors = {1.0f, 0.0f, 1.0f};
-    std::tuple<float, float, float> colorPolar = {0.0f, 0.5f, 1.0f};
+    const std::tuple<float, float, float> colorControlPoints = {1.0f, 0.8f, 0.0f};
+    const std::tuple<float, float, float> colorCurve = {0.0f, 1.0f, 0.0f};
+    const std::tuple<float, float, float> colorBernstein = {0.0f, 0.5f, 1.0f};
+    const std::tuple<float, float, float> colorVectors = {1.0f, 0.0f, 1.0f};
+    const std::tuple<float, float, float> colorPolar = {0.0f, 0.5f, 1.0f};
+    const std::tuple<float, float, float> colorSubdividedSegment1 = {0.8f, 0.0f, 0.6f};
+    const std::tuple<float, float, float> colorSubdividedSegment2 = {0.6f, 0.8f, 0.0f};
 
     double getBernstein(int i, int n, double t, BinomialCoefficients coefficients) const
     {
@@ -252,19 +290,18 @@ private:
         return curvePoints;
     }
 
-    void drawControlPoints(std::vector<Point> controlPoints) const
+    void drawControlPoints(std::vector<Point> controlPoints, std::tuple<float, float, float> color) const
     {
         for (int i = 0; i < controlPoints.size(); i++)
         {
             Point pointi = controlPoints[i];
-            float r, g, b;
-            std::tie(r, g, b) = colorControlPoints;
-            DrawingUtils::drawPoint(pointi, r, g, b, 7.0f);
+
+            DrawingUtils::drawPoint(pointi, color, 7.0f);
 
             if (i >= 1)
             {
                 Point pointiprev = controlPoints[i - 1];
-                DrawingUtils::drawLine(pointi, pointiprev, r, g, b);
+                DrawingUtils::drawLine(pointi, pointiprev, color);
             }
         }
     }

@@ -1,7 +1,9 @@
 #include "DrawingUtils.h"
 
-void DrawingUtils::drawPoint(Point p, double r, double g, double b, double size)
+void DrawingUtils::drawPoint(Point p, std::tuple<float, float, float> rgbColor, double size)
 {
+    float r, g, b;
+    std::tie(r, g, b) = rgbColor;
     glPointSize(size);
     glColor3f(r, g, b);
     glBegin(GL_POINTS);
@@ -9,8 +11,10 @@ void DrawingUtils::drawPoint(Point p, double r, double g, double b, double size)
     glEnd();
 }
 
-void DrawingUtils::drawLine(Point point1, Point point2, double r, double g, double b)
+void DrawingUtils::drawLine(Point point1, Point point2, std::tuple<float, float, float> rgbColor)
 {
+    float r, g, b;
+    std::tie(r, g, b) = rgbColor;
     glColor3f(r, g, b);
     glBegin(GL_LINE_STRIP);
     glVertex2f(point1.x, point1.y);
@@ -18,8 +22,10 @@ void DrawingUtils::drawLine(Point point1, Point point2, double r, double g, doub
     glEnd();
 }
 
-void DrawingUtils::drawCurve(std::vector<Point> points, double r, double g, double b)
+void DrawingUtils::drawCurve(std::vector<Point> points, std::tuple<float, float, float> rgbColor)
 {
+    float r, g, b;
+    std::tie(r, g, b) = rgbColor;
     glColor3f(r, g, b);
     glBegin(GL_LINE_STRIP);
     for (int i = 0; i < points.size(); i++)
