@@ -14,6 +14,7 @@ class CustomWindow
 public:
     CustomWindow(int sceneWidth, int sceneHeight, const char *title)
     {
+        glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
         this->window = glfwCreateWindow(sceneWidth, sceneHeight, title, NULL, NULL);
 
         this->sceneWidth = sceneWidth;
