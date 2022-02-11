@@ -14,3 +14,7 @@ nand2tetris/projects/06/tests/pong/pongl.hack
 # tiny-experiments/CGAlgorithms/
 tiny-experiments/CGAlgorithms/build
 tiny-experiments/Bezier/build
+web-trials/simple-client-server-with-compression/WeatherForecastsApi/bin/*
+web-trials/simple-client-server-with-compression/WeatherForecastsApi/obj/*
+web-trials/simple-client-server-with-compression/WeatherForecastsClient/bin/*
+web-trials/simple-client-server-with-compression/WeatherForecastsClient/obj/*
