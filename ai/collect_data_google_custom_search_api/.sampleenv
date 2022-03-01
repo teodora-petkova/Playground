@@ -1,0 +1,2 @@
+API_KEY=<API KEY for the current google api and project in question: https://console.developers.google.com/apis/credentials>
+SEARCH_ENGINE_CX=<Search engine ID CX from https://cse.google.com/cse/all>
