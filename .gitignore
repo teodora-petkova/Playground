@@ -28,3 +28,7 @@ ai/collect_data_google_custom_search_api/categories/*
 ai/collect_data_scraping_with_beautifulsoup/.vscode
 ai/collect_data_scraping_with_beautifulsoup/venv/*
 ai/collect_data_scraping_with_beautifulsoup/categories/*
+#ai/kNN
+ai/kNN/venv/*
+ai/kNN/__pycache__/*
+ai/kNN/utils/__pycache__/*
