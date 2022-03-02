@@ -32,3 +32,4 @@ ai/collect_data_scraping_with_beautifulsoup/categories/*
 ai/kNN/venv/*
 ai/kNN/__pycache__/*
 ai/kNN/utils/__pycache__/*
+ai/kNN/data/*

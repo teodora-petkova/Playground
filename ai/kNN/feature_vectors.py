@@ -36,7 +36,7 @@ def apply_transform_over_each_window(image, window_size, stride, transform_func)
 def get_hsv_features(image, window_size):
     # HSV is more robust towards external lighting changes
     # i.e. in the minor changes in lighting, hue values vary relatively lesser than RGB values
-
+    image = image.copy()
     def extract_color_histogram(img, binsize = 8):
     	
         hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
@@ -48,7 +48,7 @@ def get_hsv_features(image, window_size):
         hist_s = cv2.calcHist([s], [0], None, [binsize], [0,256])
         hist_v = cv2.calcHist([v], [0], None, [binsize], [0,256])
 
-        cv2.normalize(hist_h, hist_h)#, 1, 0, cv2.NORM_MINMAX) # values between [0, 1]
+        cv2.normalize(hist_h, hist_h) # values between [0, 1]
         cv2.normalize(hist_s, hist_s)
         cv2.normalize(hist_v, hist_v)
 
@@ -193,7 +193,7 @@ def show_edge_histogram_image(image, features, features_wsize, window_size):
     plt.axis('off')
     plt.show()
 
-def get_sobel_features(image, window_size, bins_number=8):
+def get_sobel_features(image, window_size, bins_size=8):
     
     stride = window_size # non-overlapping (remark: in HOG - the stride is 1 and we have overlapping!)
 
@@ -203,7 +203,7 @@ def get_sobel_features(image, window_size, bins_number=8):
     magnitudes, angles = cv2.cartToPolar(gx, gy)
    
     # the angle range = [0, 2*pi] => (angle / (2*pi)) => new range [0, 1]
-    bins = np.int32(bins_number * (angles  / (2*np.pi)))
+    bins = np.int32(bins_size * (angles  / (2*np.pi)))
 
     results = []
     image_size = image.shape[0]
@@ -214,7 +214,7 @@ def get_sobel_features(image, window_size, bins_number=8):
             magnitudes_window = magnitudes[i:i+window_size, j:j+window_size]
             angles_window = bins[i:i+window_size, j:j+window_size]
 
-            hists = np.array([np.bincount(angles_window.flatten(), magnitudes_window.flatten(), bins_number)]).flatten().tolist()
+            hists = np.array([np.bincount(angles_window.flatten(), magnitudes_window.flatten(), bins_size)]).flatten().tolist()
             
             results.append(hists)#np.array(hists).flatten())
             
