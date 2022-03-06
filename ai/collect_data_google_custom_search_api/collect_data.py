@@ -7,7 +7,7 @@ API_KEY = config('API_KEY') # https://console.developers.google.com/apis/credent
 SEARCH_ENGINE_CX = config('SEARCH_ENGINE_CX') # the search engine id/cx https://cse.google.com/cse/all
 
 """
-# TODO: still to check for the api library - google-images-search, TO TEST!!
+# now with the last changes in google-images-search 1.4.2 - downloading images from Wikipedia is working!
 image_url = "https://upload.wikimedia.org/wikipedia/commons/8/86/Man_o%27war_cove_near_lulworth_dorset_arp.jpg"
 path_to_image = "test.jpg" 
 
@@ -53,13 +53,14 @@ def save_file(path_to_image, url):
     #    print(f"Unexpected {err}, {type(err)}")
 """
 
-def download_data():              
+def main():              
     
-    categories = ['beach' ,'mountain', 'city']
+    categories = ['beach', 'mountain', 'city']
     
-    gis = GoogleImagesSearch(API_KEY, SEARCH_ENGINE_CX)
-
     for category in categories :
+    
+        gis = GoogleImagesSearch(API_KEY, SEARCH_ENGINE_CX, validate_images=True)
+
         search_parameters = {
             'q': category,
             'num': 20,
@@ -73,18 +74,18 @@ def download_data():
             #'imgColorType': 'color|gray|mono|trans|imgColorTypeUndefined' ##
         }
 
-        gis.search(search_params=search_parameters)
-        i = 0
+        print(category)
+        dirname = os.path.join("categories", category)
+        if(not(os.path.exists(dirname))):
+            os.makedirs(dirname)
+
+        gis.search(search_params=search_parameters)#, path_to_dir=dirname)
+        i = 0 
         for image in gis.results():
             print(str(i) + ": " + image.url)
             
-            dirname = os.path.join("categories2", category)
-            
-            path_to_image =  os.path.join(dirname)
-            if(not(os.path.exists(dirname))):
-                os.makedirs(dirname)
-
-            gis.download(image.url, path_to_image)
+            gis.download(image.url, dirname)
             i += 1
         
-download_data()
+if __name__ == '__main__':
+    main()
