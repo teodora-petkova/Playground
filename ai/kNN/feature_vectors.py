@@ -1,5 +1,4 @@
 from cmath import pi
-from cv2 import magnitude
 import numpy as np
 import math 
 
@@ -7,6 +6,21 @@ import math
 import cv2
 import matplotlib.pyplot as plt
 plt.close("all")
+
+from utils.image import l1_normalize, l2_normalize, minmax_normalize, standardize
+
+def normalize(A:np.array, norm:str) -> np.array:
+    
+    if norm == "l1":
+        return l1_normalize(A)
+    elif norm == "l2":
+        return l2_normalize(A)
+    elif norm == "minmax":
+        return minmax_normalize(A)
+    elif norm == "standardize":
+        return standardize(A)
+    else: # no normalization
+        return A
 
 # sources:
 #
@@ -33,7 +47,7 @@ def apply_transform_over_each_window(image, window_size, stride, transform_func)
     
     return np.array(results)
 
-def get_hsv_features(image, window_size):
+def get_hsv_features(image, window_size, norm):
     # HSV is more robust towards external lighting changes
     # i.e. in the minor changes in lighting, hue values vary relatively lesser than RGB values
     image = image.copy()
@@ -48,9 +62,9 @@ def get_hsv_features(image, window_size):
         hist_s = cv2.calcHist([s], [0], None, [binsize], [0,256])
         hist_v = cv2.calcHist([v], [0], None, [binsize], [0,256])
 
-        cv2.normalize(hist_h, hist_h) # values between [0, 1]
-        cv2.normalize(hist_s, hist_s)
-        cv2.normalize(hist_v, hist_v)
+        hist_h = normalize(hist_h, norm)
+        hist_s = normalize(hist_s, norm)
+        hist_v = normalize(hist_v, norm)
 
         window_feature_vector =  np.array([hist_h, hist_s, hist_v]).flatten()
 
@@ -100,7 +114,7 @@ def show_hsv_histograms_image(image, features,
     plt.axis('off')
     plt.show()
 
-def get_edge_histogram_descriptor(image, window_size):
+def get_edge_histogram_descriptor(image, window_size, norm):
 
     sq2 = math.sqrt(2)
     vertical_kernel       = np.array([[ 1, -1],
@@ -149,12 +163,15 @@ def get_edge_histogram_descriptor(image, window_size):
 
                 bins[max_edge_for_window_index] += 1 
 
+        bins = normalize(bins, norm)
+
         return bins
 
     stride = window_size # non-overlapping
-    
+
     features = apply_transform_over_each_window(image, window_size, stride, get_ehd_for_window)
   
+    
     return features
 
 def show_edge_histogram_image(image, features, features_wsize, window_size):
@@ -193,7 +210,7 @@ def show_edge_histogram_image(image, features, features_wsize, window_size):
     plt.axis('off')
     plt.show()
 
-def get_sobel_features(image, window_size, bins_size=8):
+def get_sobel_features(image, window_size, bins_size, norm):
     
     stride = window_size # non-overlapping (remark: in HOG - the stride is 1 and we have overlapping!)
 
@@ -202,10 +219,10 @@ def get_sobel_features(image, window_size, bins_size=8):
     
     magnitudes, angles = cv2.cartToPolar(gx, gy)
    
-    # the angle range = [0, 2*pi] => (angle / (2*pi)) => new range [0, 1]
+    # the angle range = [0, 2*pi] => (angle / (2*pi)) => new range [0, 1] * binsize => [0, binsize]
     bins = np.int32(bins_size * (angles  / (2*np.pi)))
 
-    results = []
+    features = []
     image_size = image.shape[0]
     
     for i in np.arange(0, image_size - window_size + 1, stride):
@@ -214,11 +231,14 @@ def get_sobel_features(image, window_size, bins_size=8):
             magnitudes_window = magnitudes[i:i+window_size, j:j+window_size]
             angles_window = bins[i:i+window_size, j:j+window_size]
 
-            hists = np.array([np.bincount(angles_window.flatten(), magnitudes_window.flatten(), bins_size)]).flatten().tolist()
+            hists = np.array([np.bincount(angles_window.flatten(), magnitudes_window.flatten(), bins_size)]).flatten()
+            hists = normalize(hists, norm)
+
+            features.append(hists.tolist())
             
-            results.append(hists)#np.array(hists).flatten())
-            
-    return np.array(results)
+    features = np.array(features)    
+
+    return features
 
 def show_sobel_edges_image(image, features, features_wsize, window_size, bins_number=8):
     
@@ -228,7 +248,7 @@ def show_sobel_edges_image(image, features, features_wsize, window_size, bins_nu
 
     def draw_arrow(p1, angle, magnitude):
 
-        length = int(magnitude / 356 * window_size) # a kind of normalization - magnitude from 0 to infinity...
+        length = int(magnitude * window_size) # scaling as magnitude is now normalized from 0 to 1
         p2 = (int(round(p1[0] + length * math.cos(angle * math.pi / 180.0))),
               int(round(p1[1] + length * math.sin(angle * math.pi / 180.0))))
 

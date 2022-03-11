@@ -13,17 +13,26 @@ def hsv_image(image):
     hsv_image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
     return hsv_image
 
-def normalize(image):
-    image = image
-    min_intensity = np.min(image)
-    max_intensity = np.max(image)
-    if(max_intensity - min_intensity != 0):
-        image = (image - min_intensity) / (max_intensity - min_intensity)
+def gaussian_blurred_image(image):
+    blurred_image = cv2.GaussianBlur(image, (5, 5), 0)
+    return blurred_image
+
+def increase_contrast(img):
+    lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
+    l, a, b = cv2.split(lab)
     
-    return image
+    clahe = cv2.createCLAHE(clipLimit = 2.0, tileGridSize = (8,8))
+    l2 = clahe.apply(l)
+
+    lab = cv2.merge((l2,a,b))
+    img2 = cv2.cvtColor(lab, cv2.COLOR_LAB2RGB) 
+    
+    return img2
 
 def get_canny_edges(image):
-    smoothen_image = cv2.GaussianBlur(image, (5, 5), 0)
+
+    smoothen_image = gaussian_blurred_image(image)
+
     otsu_threshold, otsu_image = cv2.threshold(smoothen_image, 0, 255,
                                                cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     structuring_element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
@@ -41,3 +50,30 @@ def show_image(image, title, colour_map = "gray"):
     plt.title(title)
     plt.axis("off")
     plt.show()
+
+def minmax_normalize(A):
+    min_intensity = np.min(A)
+    max_intensity = np.max(A)
+    if(max_intensity - min_intensity != 0):
+        # normalize to [0, 1]
+        A = (A - min_intensity) / (max_intensity - min_intensity)
+    
+    return A
+
+def l1_normalize(A):
+    norm = np.sum(np.abs(A))
+    if(norm != 0):
+        A = A / norm
+    return A
+
+def l2_normalize(A):
+    norm = np.sqrt(np.sum(np.power(A, 2)))
+    if(norm != 0):
+        A = A / norm
+    return A
+
+def standardize(A):
+    std = np.std(A)
+    if(std != 0):
+        A = (A - np.mean(A)) / np.std(A)
+    return A
