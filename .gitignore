@@ -2,6 +2,9 @@
 *.tst
 *.cmp
 *.out
+*build*
+*output*
+*input*
 nand2tetris/projects/05/*.hack
 nand2tetris/projects/06/*_pycache_*
 nand2tetris/projects/06/tests/add/add.hack
