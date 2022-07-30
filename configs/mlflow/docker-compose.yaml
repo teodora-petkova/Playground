@@ -1,9 +1,46 @@
 # MLFlow is hidden behind nginx, allowing user auth to be implemented.
 
-version: '1.0'
+version: '3.0'
 
 services:
-    app:
+    postgres_db:
+        restart: always
+        image: postgres:latest
+        container_name: mlflow_db
+        expose:
+            - ${DB_PORT}
+        networks:
+            - backend
+            #backend:
+            #    ipv4_address: 192.168.0.2  
+        environment:
+            - POSTGRES_DB=${DB_NAME}
+            - POSTGRES_USER=${DB_USER}
+            - POSTGRES_PASSWORD=${DB_PW}
+        volumes:
+            - type: bind
+              bind:
+                create_host_path: true
+              source: /raid/mlflow/postgres_db # host // NOTE: do not use a folder on NAS - issues with the changing of the owner of the folder
+              target: /var/lib/postgresql/data/ # docker container
+            #- postgres_database:/var/lib/postgresql/data
+
+
+    pgadmin:
+        #restart: always # to restart always?
+        image: dpage/pgadmin4
+        container_name: mlflow_pgadmin
+        environment: 
+            - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+            - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+        ports: 
+            - ${PGADMIN_PORT}:80
+        networks:
+            - backend
+            #backend:
+            #    ipv4_address: 192.168.0.3
+
+    mlflow:
         restart: always
         build: ./mlflow
         image: mlflow_server
@@ -15,39 +52,50 @@ services:
             - backend
         volumes:
            - type: bind
-             source: ./mlruns
-             target: /mlruns
+             bind:
+                create_host_path: true
+             source: ${WORKSPACE}/mlruns # host
+             target: ${WORKSPACE}/mlruns # docker container
         environment:
-            - BACKEND=./mlruns
-            - ARTIFACTS=./mlruns
+            - BACKEND=postgresql://${DB_USER}:${DB_PW}@postgres_db:${DB_PORT}/${DB_NAME}
+            - ARTIFACTS=${WORKSPACE}/mlruns 
         command: 
             - sh
             - -c
             - mlflow server 
                 --port ${MLFLOW_PORT}
                 --host 0.0.0.0 
-                --backend-store-uri file:$${BACKEND}
-                --default-artifact-root file:$${ARTIFACTS}
-
+                --backend-store-uri $${BACKEND}
+                --default-artifact-root $${ARTIFACTS}
+        depends_on:
+            - postgres_db
 
     nginx:
         restart: always
         build: 
             context: ./nginx
             args:
-              - NGINX_HTTP_AUTH_USER=${NGINX_HTTP_AUTH_USER} 
-              - NGINX_HTTP_AUTH_PASSWORD=${NGINX_HTTP_AUTH_PASSWORD}
+              - NGINX_HTTP_AUTH_USER=${MLFLOW_TRACKING_USERNAME} 
+              - NGINX_HTTP_AUTH_PASSWORD=${MLFLOW_TRACKING_PASSWORD}
         image: mlflow_nginx
         container_name: mlflow_nginx
         ports:
-            - "${MLFLOW_PORT}:80"
+            - "${MLFLOW_PORT}:${NGINX_PORT}"
         networks:
             - frontend
         depends_on:
-            - app
+            - mlflow
 
 networks:
     frontend:
         driver: bridge
     backend:
         driver: bridge
+        #ipam:
+        #    driver: bridge
+        #    config:
+        #        - subnet: "192.168.0.0/24"
+        #          gateway: 192.168.0.1
+      
+volumes:
+    postgres_database:
